@@ -32,7 +32,7 @@ def load_transcription(csvfile):
 
 def main(args):
     if len(args) < 3:
-        print("Грузинский транскриптор!\nВведите название исходного файла и файла для вывода.")
+        print("Амхарский транскриптор!\nВведите название исходного файла и файла для вывода.")
     else:
         # загружаем соответствия букв и звуков
         l2s_dict = load_transcription(CSVFILE)
