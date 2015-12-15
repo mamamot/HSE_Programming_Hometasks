@@ -5,20 +5,6 @@ __author__ = 'v. tushkanov'
 CSVFILE = "transcription.csv"
 
 
-# def make_dict(csv):
-#     """
-#     Создает из csv словарь, где ключ - буква, значение - соответствующий ему звук.
-#     :param csv: csv c запятой в качестве разделителя столбцов и \n в качестве разделителя элементов.
-#     :return: словарь, где ключ - буква, значение - соответствующий ему звук.
-#     """
-#     l2s_dict = dict()
-#     letter_sound = csv.split("\n")
-#     for pair in letter_sound:
-#         letter, sound = pair.split(",")
-#         l2s_dict[letter] = sound
-#     return l2s_dict
-
-
 def load_transcription(csvfile):
     """
     Загружает CSV-файл и возвращает словарь с соответствиями буква-звук
