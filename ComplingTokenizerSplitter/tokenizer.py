@@ -50,8 +50,13 @@ def tokenize(text, twittermode, urlmode):
             if char == "-":
                 # проверяем, не перенос ли это
                 if len(buffer) > 1 and (length - position) > 1:
-                    if text[position + 1] == "\n" and buffer[-1].isalpha():
+                    nextchar = text[position + 1]
+                    if nextchar == "\n" and buffer[-1].isalpha():
                         islinebreak = True
+                        position += 1
+                        continue
+                    elif nextchar.isalpha() and len(buffer) > 0:
+                        buffer.append(char)
                         position += 1
                         continue
             if len(buffer) > 0:
@@ -85,7 +90,6 @@ def tokenize(text, twittermode, urlmode):
                         else:
                             token = token.lower()
                         tokens.append(token)
-                        print("going to add " + char)
                         tokens.append(char)
                         buffer = list()
                 else:
@@ -99,7 +103,6 @@ def tokenize(text, twittermode, urlmode):
                     else:
                         token = token.lower()
                     tokens.append(token)
-                    print("going to add " + char)
                     tokens.append(char)
                     buffer = list()
             else:
