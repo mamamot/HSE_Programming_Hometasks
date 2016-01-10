@@ -5,7 +5,7 @@ twitter = False
 url = False
 
 
-def tokenize(text, twittermode, urlmode):
+def tokenize(text, twittermode, urlmode, makelower=True):
     # подготавливаем строку к обработке
     text = text.replace("\r\n", "\n")
     # список для хранения токенов
@@ -42,14 +42,15 @@ def tokenize(text, twittermode, urlmode):
                 elif is_mail:
                     is_mail = False
                 else:
-                    token = token.lower()
+                    if makelower:
+                        token = token.lower()
                 tokens.append(token)
                 buffer = list()
         else:
             # нам встретился знак препинания
             if char == "-":
                 # проверяем, не перенос ли это
-                if len(buffer) > 1 and (length - position) > 1:
+                if len(buffer) > 0 and (length - position) > 1:
                     nextchar = text[position + 1]
                     if nextchar == "\n" and buffer[-1].isalpha():
                         islinebreak = True
@@ -88,7 +89,8 @@ def tokenize(text, twittermode, urlmode):
                         elif is_mail:
                             is_mail = False
                         else:
-                            token = token.lower()
+                            if makelower:
+                                token = token.lower()
                         tokens.append(token)
                         tokens.append(char)
                         buffer = list()
@@ -101,7 +103,8 @@ def tokenize(text, twittermode, urlmode):
                     elif is_mail:
                         is_mail = False
                     else:
-                        token = token.lower()
+                        if makelower:
+                            token = token.lower()
                     tokens.append(token)
                     tokens.append(char)
                     buffer = list()
@@ -111,6 +114,10 @@ def tokenize(text, twittermode, urlmode):
                     buffer.append(char)
                 else:
                     tokens.append(char)
+        if tokens[-3:] == [".", ".", "."]:
+            # три точки подряд - явно двоеточие
+            tokens = tokens[:-3]
+            tokens.append("…")
         position += 1
     return tokens
 
