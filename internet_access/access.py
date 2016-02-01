@@ -13,7 +13,8 @@ dir = "dump"
 relink = r'<a href=\"([^\"]*)\".*>'
 revalid = r'^http\://[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(/\S*)?$'
 dump_path = "./dump/"
-mata_path = "info.csv"
+meta_path = "info.csv"
+mystem_path = "mystem.exe"
 # список разделов унеченской газеты
 topics = ['main', 'vlast', 'ludi', 'kultura', 'nashi_intervu',
           'shkola', 'zdorove', 'iz_pochti', 'aktualno', 'sport', 'misc']
@@ -44,6 +45,22 @@ def get_date(page):
         return re.findall(date_re, page)[0]
     else:
         return "00-00-0000"
+
+
+def get_header(tree):
+    try:
+        # title = tree.xpath('.//title/text()')[0]
+        # return title.split("»")[0].strip("«»")
+        title = tree.xpath('.//h2/text()')[1]
+        return str(title)
+    except:
+        return "Заголовок недоступен"
+
+
+def morphanalysis(filename):
+    print("Morphological analysis started: " + filename)
+    os.system("{0} {1} {2} {3}".format(mystem_path, filename, filename + "_m.txt", "-e cp1251 -d -c -i"))
+    os.system("{0} {1} {2} {3}".format(mystem_path, filename, filename + "_m.xml", "-e cp1251 -d -c -i --format xml"))
 
 
 def load_page(url, encoding="cp1251"):
@@ -88,8 +105,7 @@ def validate_and_fix(links):
     return fixed
 
 
-def extract_links(page_text):
-    tree = lxml.html.fromstring(page_text)
+def extract_links(tree):
     links = list()
     for a in tree.iter('a'):
         link_url = a.get('href')
@@ -107,6 +123,14 @@ def is_article(link):
     return link.endswith(".html")
 
 
+def get_article_text(tree):
+    try:
+        text = tree.xpath('.//p[@class="a"]/span/text()')
+        return "\n".join(text)
+    except Exception as e:
+        return "Текст недоступен"
+
+
 def spider(queue, loc, path):
     """
     Dumps the text content of the page into a directory.
@@ -118,6 +142,7 @@ def spider(queue, loc, path):
     :param path: the path to dump pages to
     :return: the number of pages dumped
     """
+    csv_writer = open(os.path.join(path, meta_path), "w")
     visited = list()
     visited_counter = 0
     saved_counter = 0
@@ -128,6 +153,7 @@ def spider(queue, loc, path):
         visited.append(address)
         queue = queue[:-1]
         if loaded:
+            tree = lxml.html.fromstring(page)
             visited_counter += 1
             topic, filename = classify_and_name(address)
             if len(filename) > 150:
@@ -135,17 +161,25 @@ def spider(queue, loc, path):
             # filename = os.path.join(path, filename)
             print(classify_and_name(address))
             if is_article(address):
-                date = get_date(page).split("-")
-                print("-".join(date))
-                savepath = os.path.join(path, date[2], date[1])
-                filename = os.path.join(savepath, filename)
-                if not os.path.exists(savepath):
-                    os.makedirs(savepath)
-                with open(filename, "w") as f:
-                    print("Dumping: " + address + " to " + filename)
-                    f.write(page)
-                    saved_counter += 1
-            links = extract_links(page)
+                article_text = get_article_text(tree)
+                if article_text != "Текст недоступен":
+                    date = get_date(page).split("-")
+                    print("-".join(date))
+                    savepath = os.path.join(path, date[2], date[1])
+                    filename = os.path.join(savepath, filename) + ".txt"
+                    if not os.path.exists(savepath):
+                        os.makedirs(savepath)
+                    with open(filename, "w", encoding="cp1251") as f:
+                        print("Dumping: " + address + " to " + filename)
+                        title = get_header(tree)
+                        f.write(article_text)
+                        saved_counter += 1
+                        csv_line = '"{0}",{1},{2},{3}\n'.format(title, ".".join(date), topic, filename)
+                        print(csv_line)
+                        csv_writer.write(csv_line)
+                        csv_writer.flush()
+                    morphanalysis(filename)
+            links = extract_links(tree)
             fixed = validate_and_fix(links)
             for link in fixed:
                 if link not in visited and link not in queue:
@@ -153,6 +187,7 @@ def spider(queue, loc, path):
                         queue.append(link)
         else:
             print("Error loading page: {}: {}".format(code, page))
+    csv_writer.close()
     return visited_counter, saved_counter
 
 if __name__ == "__main__":
