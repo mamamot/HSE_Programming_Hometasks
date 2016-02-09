@@ -7,6 +7,9 @@ ACRONYMS = list()
 def load_acronyms(path):
     for ch in "АБВГДЕЖЗИКЛАМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ":
         ACRONYMS.append(ch)
+    f = open("acronyms.txt", "r", encoding="utf-8")
+    for line in f:
+        ACRONYMS.append(line.strip())
     print(ACRONYMS)
 
 
