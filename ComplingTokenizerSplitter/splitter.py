@@ -1,6 +1,6 @@
 from ComplingTokenizerSplitter import tokenizer
 
-FINAL_PUNCT = [".", "!", "?", "…"]
+FINAL_PUNCT = [".", "!", "?", "…", "\n"]
 ACRONYMS = list()
 
 
@@ -23,7 +23,8 @@ def split(text):
     for token_pos in range(len(text_tokenized)):
         if text_tokenized[token_pos] in FINAL_PUNCT and token_pos > 0:
             if text_tokenized[token_pos - 1] not in ACRONYMS:
-                sentence_tokens.append(text_tokenized[token_pos])
+                if text_tokenized[token_pos] != "\n":
+                    sentence_tokens.append(text_tokenized[token_pos])
                 sentences.append("".join(sentence_tokens))
                 sentence_tokens = list()
             else:

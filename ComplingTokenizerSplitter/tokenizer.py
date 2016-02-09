@@ -45,9 +45,9 @@ def tokenize(text, twittermode, urlmode, makelower=True, include_whitespaces=Fal
                     if makelower:
                         token = token.lower()
                 tokens.append(token)
-                if include_whitespaces and char == " ":
-                    tokens.append(" ")
                 buffer = list()
+            if include_whitespaces:
+                tokens.append(char)
         else:
             # нам встретился знак препинания
             if char == "-":
