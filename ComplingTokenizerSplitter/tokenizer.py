@@ -117,7 +117,7 @@ def tokenize(text, twittermode, urlmode, makelower=True, include_whitespaces=Fal
                 else:
                     tokens.append(char)
         if tokens[-3:] == [".", ".", "."]:
-            # три точки подряд - явно двоеточие
+            # три точки подряд - явно троеточие
             tokens = tokens[:-3]
             tokens.append("…")
         position += 1

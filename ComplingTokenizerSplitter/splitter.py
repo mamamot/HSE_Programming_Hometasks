@@ -15,7 +15,7 @@ def load_acronyms(path):
 
 def split(text):
     load_acronyms("")
-    text_tokenized = tokenizer.tokenize(text, False, False, False, True)
+    text_tokenized = tokenizer.tokenize(text, False, True, False, True)
     print(text_tokenized)
     pos = 0
     sentence_tokens = list()
