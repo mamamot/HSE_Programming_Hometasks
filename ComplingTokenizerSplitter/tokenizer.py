@@ -5,7 +5,7 @@ twitter = False
 url = False
 
 
-def tokenize(text, twittermode, urlmode, makelower=True):
+def tokenize(text, twittermode, urlmode, makelower=True, include_whitespaces=False):
     # подготавливаем строку к обработке
     text = text.replace("\r\n", "\n")
     # список для хранения токенов
@@ -45,6 +45,8 @@ def tokenize(text, twittermode, urlmode, makelower=True):
                     if makelower:
                         token = token.lower()
                 tokens.append(token)
+                if include_whitespaces and char == " ":
+                    tokens.append(" ")
                 buffer = list()
         else:
             # нам встретился знак препинания
@@ -121,5 +123,6 @@ def tokenize(text, twittermode, urlmode, makelower=True):
         position += 1
     return tokens
 
-f = open("tokenizeme.txt", encoding="utf-8")
-print(tokenize(f.read(), True, True))
+if __name__ == "__main__":
+    f = open("tokenizeme.txt", encoding="utf-8")
+    print(tokenize(f.read(), True, True))
