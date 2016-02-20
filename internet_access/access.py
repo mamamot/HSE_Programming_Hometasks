@@ -18,11 +18,20 @@ mystem_path = "mystem.exe"
 # список разделов унеченской газеты
 topics = ['main', 'vlast', 'ludi', 'kultura', 'nashi_intervu',
           'shkola', 'zdorove', 'iz_pochti', 'aktualno', 'sport', 'misc']
+csv_header = "path,author,sex,birthday,header,created,sphere,genre_fi,type," \
+             "topic,chronotop,style,audience_age,audience_level,audience_size,source," \
+             "publication,publisher,publ_year,medium,country,region,language"
+
+text_header = "@au Noname\n" \
+              "@ti {0}\n" \
+              "@da {1}\n" \
+              "@topic {2}\n" \
+              "@url {3}\n\n"
 
 
 def classify_and_name(link):
     """
-    Функция, определяющая, к какому разделу относится данная статья и присваивающая ей имя
+    Определить, к какому разделу относится данная статья и присвоить ей имя
     :param link:
     :return: кортеж
     """
@@ -40,6 +49,11 @@ def classify_and_name(link):
 
 
 def get_date(page):
+    """
+    Извлечь дату публикации статьи, если возможно
+    :param page: текст страницы в виде строки
+    :return: строка вида xx-xx-xxx
+    """
     date_re = r"Добавлено: \((\d?\d-\d\d-\d\d\d\d), \d\d:\d\d\)"
     if re.search(date_re, page):
         return re.findall(date_re, page)[0]
@@ -48,6 +62,11 @@ def get_date(page):
 
 
 def get_header(tree):
+    """
+    Получить заголовок статьи.
+    :param tree: lxml-дерево страницы
+    :return: строка заголовка
+    """
     try:
         # title = tree.xpath('.//title/text()')[0]
         # return title.split("»")[0].strip("«»")
@@ -65,7 +84,7 @@ def morphanalysis(filename):
 
 def load_page(url, encoding="cp1251"):
     """
-    A safe and simple function loading an Internet page
+    Простая функция для загрузки страницы с сайта
 
     :param url: URI of the page
     :param encoding: page encoding
@@ -143,6 +162,7 @@ def spider(queue, loc, path):
     :return: the number of pages dumped
     """
     csv_writer = open(os.path.join(path, meta_path), "w")
+    csv_writer.write(csv_header)
     visited = list()
     visited_counter = 0
     saved_counter = 0
@@ -174,11 +194,16 @@ def spider(queue, loc, path):
                         title = get_header(tree)
                         f.write(article_text)
                         saved_counter += 1
-                        csv_line = '"{0}",{1},{2},{3}\n'.format(title, ".".join(date), topic, filename)
+                        csv_line = '{0},,,,"{1}",{2},публицистика,,,{3},,нейтральный,н-возраст,н-уровень,районная,{4},'\
+                                   '"Унечская газета",,{5},газета,Россия,ru\n'.format(filename, title, ".".join(date),
+                                                                                      topic, address, date[2])
                         print(csv_line)
                         csv_writer.write(csv_line)
                         csv_writer.flush()
                     morphanalysis(filename)
+                    with open(filename, "w", encoding="cp1251") as f:
+                        f.write(text_header.format(title, ".".join(date), topic, address))
+                        f.write(article_text)
             links = extract_links(tree)
             fixed = validate_and_fix(links)
             for link in fixed:

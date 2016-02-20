@@ -1,8 +1,12 @@
 # encoding: utf-8
+import sys
+import io
+
 __author__ = 'vtush'
 
 twitter = False
 url = False
+makelower = True
 
 
 def tokenize(text, twittermode, urlmode, makelower=True, include_whitespaces=False):
@@ -58,12 +62,17 @@ def tokenize(text, twittermode, urlmode, makelower=True, include_whitespaces=Fal
                         islinebreak = True
                         position += 1
                         continue
-                    elif nextchar.isalpha() and len(buffer) > 0:
+                    elif nextchar.isalnum() and len(buffer) > 0:
                         buffer.append(char)
                         position += 1
                         continue
             if len(buffer) > 0:
                 # это знак препинания после слова
+                if char in [":", ".", "/"] and position < len(text) + 1:
+                    if buffer[-1].isdigit() and text[position + 1].isalnum():
+                        buffer.append(char)
+                        position += 1
+                        continue
                 if urlmode and len(buffer) > 1:
                     # проверяем, не ссылка ли это
                     if "".join(buffer[0:2]) in ["ww", "ht"] and char in [".", "/", ":", "&", "?", "=", "-", "_", "@"]:
@@ -96,6 +105,7 @@ def tokenize(text, twittermode, urlmode, makelower=True, include_whitespaces=Fal
                         tokens.append(token)
                         tokens.append(char)
                         buffer = list()
+                        # добавить распознавание (.), (:) и (/) для цифр и
                 else:
                     token = "".join(buffer)
                     if is_url:
@@ -124,5 +134,32 @@ def tokenize(text, twittermode, urlmode, makelower=True, include_whitespaces=Fal
     return tokens
 
 if __name__ == "__main__":
-    f = open("tokenizeme.txt", encoding="utf-8")
-    print(tokenize(f.read(), True, True))
+    if len(sys.argv) < 3:
+        print("Welcome to AKVA Tokenizer (Awesome Ksusha, Vlad and Albert's Tokenizer)!\n"
+              "Please provide the paths to the source and output files.\n"
+              "\n"
+              "Supported arguments:\n"
+              "-t - Twitter tag detection\n"
+              "-u - advanced url and e-mail detection\n"
+              "-c - preserve upper and lower case")
+    else:
+        try:
+            f = open(sys.argv[1], "r", encoding="utf-8")
+            print("Tokenization started")
+            if "-t" in sys.argv:
+                twitter = True
+            if "-u" in sys.argv:
+                url = True
+            if "-c" in sys.argv:
+                makelower = False
+            tokenized = tokenize(f.read(), twitter, url, makelower)
+            #print(tokenized)
+            f.close()
+            f = open(sys.argv[2], "w", encoding="utf-8")
+            f.write("\n".join(tokenized))
+            print("Here3")
+            f.close()
+            print("Tokenization completed")
+        except Exception as e:
+            print("An error occurred during tokenization. Please, double-check the arguments.")
+            print(str(e))
