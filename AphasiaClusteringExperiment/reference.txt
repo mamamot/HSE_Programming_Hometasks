@@ -1,0 +1,10 @@
+Вид запроса:
+Прямое дополнение
+http://search.ruscorpora.ru/search.xml?env=sas1_2&mycorp=&mysent=&mysize=&mysentsize=&dpp=100&spp=100&spd=100&text=lexgramm&mode=ngrams_2_lexgr&sort=gr_freq&lang=ru&nodia=1&parent1=0&level1=0&lex1=&gramm1=V%2Ctran%2Cact&flags1=&parent2=0&level2=0&min2=1&max2=1&lex2=LEMME&gramm2=%28acc%7Cacc2%29&flags2=
+Дополнение с предлогом
+http://search.ruscorpora.ru/search.xml?env=sas1_2&mycorp=&mysent=&mysize=&mysentsize=&dpp=100&spp=100&spd=100&text=lexgramm&mode=ngrams_3_lexgr&sort=gr_freq&lang=ru&nodia=1&parent1=0&level1=0&lex1=&gramm1=V&flags1=&parent2=0&level2=0&min2=1&max2=1&lex2=&gramm2=PR&flags2=&parent3=0&level3=0&min3=1&max3=1&lex3=LEMME&gramm3=&flags3=
+
+Формат строки в таблице (биграммы):
+<tr><td align="right">27</td><td align="right">15</td><td align="right">13</td><td width="100%"> <span class="b-wrd-expl g-em" explain="%D0%BB%D1%8E%D0%B1%D0%B8%D0%BB%D0%B8%7C134%7C10%7C0%7C0%7C0%7C0%7C0">любили</span> <span class="b-wrd-expl g-em" explain="%D0%BE%D1%82%D1%86%D0%B0%7C1087%7C1%7C0%7C0%7C0%7C0%7C0">отца</span> </td></tr>
+Формат строки в таблице (триграммы): 
+<tr><td align="right">4</td><td align="right">45</td><td align="right">36</td><td width="100%"> <span class="b-wrd-expl g-em" explain="%D0%B2%D0%B7%D0%B3%D0%BB%D1%8F%D0%BD%D1%83%D0%BB%7C377%7C60%7C0%7C0%7C0%7C0%7C0">взглянул</span> <span class="b-wrd-expl g-em" explain="%D0%BD%D0%B0%7C18%7C1%7C0%7C0%7C0%7C0%7C0">на</span> <span class="b-wrd-expl g-em" explain="%D0%BE%D1%82%D1%86%D0%B0%7C691%7C10%7C0%7C0%7C0%7C0%7C0">отца</span> </td></tr>
