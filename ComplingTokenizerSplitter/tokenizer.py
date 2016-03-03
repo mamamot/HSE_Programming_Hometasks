@@ -153,7 +153,7 @@ if __name__ == "__main__":
             if "-c" in sys.argv:
                 makelower = False
             tokenized = tokenize(f.read(), twitter, url, makelower)
-            #print(tokenized)
+            # print(tokenized)
             f.close()
             f = open(sys.argv[2], "w", encoding="utf-8")
             f.write("\n".join(tokenized))
