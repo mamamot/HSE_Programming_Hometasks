@@ -35,54 +35,64 @@ def dict_parse(dictfile, json_path=None):
 
 
 def sentences(path):
+    """
+    Генератор, открывает файл, парсит его и выдает по одному предложению из тегов se
+    :param path: путь к файлу
+    :return:
+    """
     with open(path, "r", encoding="utf-8") as f:
         tree = lxml.html.fromstring(f.read())
         for se in tree.xpath(".//se/text()"):
-            yield se
+            yield se.strip()
 
-with open("cedict_ts.u8", "r", encoding="utf-8") as f:
-    parsed_dict = dict_parse(f)
 
-words = list()
+if __name__ == "__main__":
+    # открываем словарь
+    with open("cedict_ts.u8", "r", encoding="utf-8") as f:
+        parsed_dict = dict_parse(f)
 
-html = etree.Element("html")
-head = etree.SubElement(html, "head")
-body = etree.SubElement(html, "body")
-for sentence in sentences("stal.xml"):
-    print("Analyzing sentence: {}".format(sentence))
-    se = etree.SubElement(body, "se")
-    window = len(sentence)
-    print(window)
-    last_w = None
-    while window > 0:
-        if sentence[0:window] in parsed_dict:
-            word = sentence[0:window]
-            print("Analyzing: {}".format(word))
-            w = etree.SubElement(se, "w")
-            last_w = w
-            for ana in parsed_dict[word]:
-                ana = etree.SubElement(w, "ana", lex=word, sem=ana['sem'], transcr=ana['transcr'])
-                last_ana = ana
-            last_ana.tail = word
-            sentence = sentence[window:]
-            window = len(sentence)
+    # создаем дерево
+    html = etree.Element("html")
+    head = etree.SubElement(html, "head")
+    body = etree.SubElement(html, "body")
+    # анализируем текст по предложениям
+    for sentence in sentences("stal.xml"):
+        print("Analyzing sentence: {}".format(sentence))
+        if len(sentence) == 0:
             continue
-        else:
-            print("Not match: {} len {}".format(sentence[0:window], window))
-            window -= 1
-        if window == 0:
-            if last_w is not None:
-                last_w.tail = sentence[0:1]
+        se = etree.SubElement(body, "se")
+        window = len(sentence)
+        last_w = None
+        while window > 0:
+            if sentence[0:window] in parsed_dict:
+                word = sentence[0:window]
+                print("Analyzing word: {}".format(word))
+                w = etree.SubElement(se, "w")
+                last_w = w
+                for ana in parsed_dict[word]:
+                    ana = etree.SubElement(w, "ana", lex=word, sem=ana['sem'], transcr=ana['transcr'])
+                    last_ana = ana
+                if last_ana is not None:
+                    last_ana.tail = word
+                sentence = sentence[window:]
+                window = len(sentence)
+                continue
             else:
-                if se.text is not None:
-                    se.text += sentence[0:1]
+                # print("Not match: {} len {}".format(sentence[0:window], window))
+                window -= 1
+            if window == 0:
+                if last_w is not None:
+                    last_w.tail = sentence[0:1]
                 else:
-                    se.text = sentence[0:1]
-            sentence = sentence[1:]
-            window = len(sentence)
-
-with open("out.xml", "w", encoding="utf-8") as f:
-    f.write(etree.tostring(html, encoding="utf-8", xml_declaration=True, pretty_print=True).decode("utf-8"))
+                    if se.text is not None:
+                        se.text += sentence[0:1]
+                    else:
+                        se.text = sentence[0:1]
+                sentence = sentence[1:]
+                window = len(sentence)
+    # запишем результат
+    with open("out.xml", "w", encoding="utf-8") as f:
+        f.write(etree.tostring(html, encoding="utf-8", xml_declaration=True, pretty_print=True).decode("utf-8"))
 
 
 
