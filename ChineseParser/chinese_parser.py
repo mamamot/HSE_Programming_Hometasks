@@ -44,18 +44,45 @@ with open("cedict_ts.u8", "r", encoding="utf-8") as f:
     parsed_dict = dict_parse(f)
 
 words = list()
-root = etree.Element("xml")
-html = etree.SubElement(root, "html")
-head = etree.SubElement(root, "head")
+
+html = etree.Element("html")
+head = etree.SubElement(html, "head")
 body = etree.SubElement(html, "body")
 for sentence in sentences("stal.xml"):
+    print("Analyzing sentence: {}".format(sentence))
     se = etree.SubElement(body, "se")
     window = len(sentence)
-    while window > 1:
-        if se[0, window] in parsed_dict:
-            break
-    else:
-        pass
+    print(window)
+    last_w = None
+    while window > 0:
+        if sentence[0:window] in parsed_dict:
+            word = sentence[0:window]
+            print("Analyzing: {}".format(word))
+            w = etree.SubElement(se, "w")
+            last_w = w
+            for ana in parsed_dict[word]:
+                ana = etree.SubElement(w, "ana", lex=word, sem=ana['sem'], transcr=ana['transcr'])
+                last_ana = ana
+            last_ana.tail = word
+            sentence = sentence[window:]
+            window = len(sentence)
+            continue
+        else:
+            print("Not match: {} len {}".format(sentence[0:window], window))
+            window -= 1
+        if window == 0:
+            if last_w is not None:
+                last_w.tail = sentence[0:1]
+            else:
+                if se.text is not None:
+                    se.text += sentence[0:1]
+                else:
+                    se.text = sentence[0:1]
+            sentence = sentence[1:]
+            window = len(sentence)
+
+with open("out.xml", "w", encoding="utf-8") as f:
+    f.write(etree.tostring(html, encoding="utf-8", xml_declaration=True, pretty_print=True).decode("utf-8"))
 
 
 
