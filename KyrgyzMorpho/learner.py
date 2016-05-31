@@ -50,7 +50,6 @@ def parse(words, affixes, stems):
             else:
                 previous_count = candidate_count
                 previous_candidate = candidate
-    #return affixes, stems
 
 
 def crawl(path="./pages"):
@@ -71,9 +70,7 @@ def tokenize(text):
     return [w.strip("«»").lower() for w in word_tokenize(text)]
 
 
-aff, stems = crawl("./pages_test")
-print(type(aff))
-with open("stems.json", "w", encoding="utf-8") as w:
-    json.dump(stems, w)
-with open("affixes.json", "w", encoding="utf-8") as w:
+aff, stems = crawl("./pages")
+print("Affixes collected: " + str(len(aff)))
+with open("affixes.json", "w") as w:
     json.dump(aff, w)
