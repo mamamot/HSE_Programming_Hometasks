@@ -1,5 +1,5 @@
 # HSE_Programming_Hometasks
-## internet_access
+## NewspaperCorpora
 Краулер для автоматического сбора корпуса по "Унечской газете" с использованием lxml и регулярных выражений.
 
 ## Aphasia Clusterting Expreiment
