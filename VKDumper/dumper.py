@@ -3,13 +3,19 @@ from datetime import date
 import os
 from time import sleep
 
-APPID = "5495761"
+APPID = ""
 TOWNID = 716  # Унеча
 # TODO: sensitive credentials here: don't commit!
-
+LOGIN = ""
+PASSWORD = ""
 
 
 def get_age(bdate):
+    """
+    Determine the age of a person from their birth date
+    :param bdate: birthdate in format dd.mm.yyyy
+    :return: integer age
+    """
     day, month, year = (int(x) for x in bdate.split("."))
     today = date.today()
     born = date(year, month, day)
@@ -27,6 +33,7 @@ def get_and_save_users(vkapi, town, count=1000):
         uids.append(uid)
         sex = user['sex']
         if 'bdate' in user:
+            # checking whether the full birth date is available
             if len(user['bdate'].split(".")) == 3:
                 age = get_age(user['bdate'])
             else:
@@ -69,7 +76,7 @@ def get_and_save_posts(api, uids):
 
 
 if __name__ == "__main__":
-    session = vk.AuthSession(app_id='5495761', user_login=LOGIN, user_password=PASSWORD)
+    session = vk.AuthSession(app_id=APPID, user_login=LOGIN, user_password=PASSWORD)
     api = vk.API(session)
     # skipping the number of entries - we can only get 1000
     uids = get_and_save_users(api, TOWNID)
