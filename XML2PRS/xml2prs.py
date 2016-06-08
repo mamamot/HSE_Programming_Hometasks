@@ -1,5 +1,7 @@
 from lxml import etree
 import csv
+import os
+import sys
 
 
 def xml2prs(xml_filename, prs_filename):
@@ -85,9 +87,33 @@ def xml2prs(xml_filename, prs_filename):
             writer = csv.DictWriter(w, fieldnames, delimiter="\t")
             writer.writeheader()
             writer.writerows(data)
+        print("Converting done.")
     except Exception as e:
         print("Error converting XML to PRS: {}".format(str(e)))
 
 
+def prs2xml(prs_filename, xml_filename):
+    pass
+
+
 if __name__ == "__main__":
-    xml2prs("example_corpus.xml", "test1.prs")
+    print("Welcome to the XML2PRS (and vice versa) converter!")
+    if len(sys.argv) == 3:
+        infile = sys.argv[1]
+        outfile = sys.argv[2]
+        if os.path.isfile(infile):
+            if os.path.exists(os.dirname(outfile)):
+                # не обязательно заставлять пользователя указывать направление конвертации -
+                # его можно угадать по расширению источника
+                if os.path.splitext(os.dirname(infile)) == ".xml":
+                    xml2prs(infile, outfile)
+                elif os.path.splitext(os.dirname(infile)) == ".prs":
+                    prs2xml(infile, outfile)
+                else:
+                    print("Incorrect input file extension. Only XML and PRS are supported.")
+            else:
+                print("Output path does not exist.")
+        else:
+            print("Input file does not exist.")
+    else:
+        print("Usage: python xml2prs.py [inputfile] [outputfile]")
