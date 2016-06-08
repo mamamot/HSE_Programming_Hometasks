@@ -1,13 +1,4 @@
 #sentno	#wordno	#lang	#graph	#word	#indexword	#nvars	#nlems	#nvar	#lem	#trans	#trans_ru	#lex	#gram	#flex	#punctl	#punctr	#sent_pos
-#meta.docid	1
-#meta.author	Әхмәҙин Әфтәх
-#meta.title	Күк күкрәтеп юлдарыма
-#meta.date1	1900
-#meta.date2	2010
-#meta.genre	verse
-#meta.words	38
-#meta.sentences	15
-#meta.date_displayed	——
 1	1		cap	Күк		2	1	1	күк	небо		S	NOM SG Ø syll8				bos
 1	1		cap	Күк		2	1	2	күк	синий		ADJ	NOM SG Ø syll8				bos
 1	2			күкрәтеп		1	1	1	күкрә	греметь		V	CAUS GER т еп syll8				
