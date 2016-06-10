@@ -25,16 +25,17 @@ def xml2prs(xml_filename, prs_filename):
                     lemmas = set()
                     # здесь мы храним номер варианта, на котором мы сейчас
                     variant_count = 0
-                    # здесь общее количество разборо
+                    # здесь общее количество разборов
                     variants_total = 0
                     word_count += 1
-                    if word_count == 1:
-                        sent_pos = 'bos'  # непонятно, что делать, если предложение из одного слова, пусть будет bos.
-                    elif word_count == sent_len:
-                        sent_pos = 'eos'
+                    if word_count == sent_len:
+                        sent_pos = 'eos'   # непонятно, что делать, если предложение из одного слова, пусть будет eos
+                    elif word_count == 1:  # так как это упрощает обратный парсинг
+                        sent_pos = 'bos'
                     else:
                         sent_pos = ''
                     # нам нужно посчитать, сколько у нас разных лемм и найти само слово из текста
+                    ana = None
                     for ana in word.iter('ana'):
                         variants_total += 1
                         lemma = ana.get('lex')
@@ -42,7 +43,10 @@ def xml2prs(xml_filename, prs_filename):
                             lemmas.add(lemma)
                     else:
                         # собственно слово является хвостом последнего элемента ana.
-                        word_entry = ana.tail.strip()
+                        if ana is not None:
+                            word_entry = ana.tail.strip()
+                        else:
+                            word_entry = ""
                     # капитализация
                     if word_entry[0].isupper():
                         cap = "cap"
@@ -74,7 +78,7 @@ def xml2prs(xml_filename, prs_filename):
                             '#trans_ru': "",
                             '#lex': pos,
                             '#gram': grammar_tag.upper(), # нужно больше информации о номенклатуре тегов
-                            '#flex': "",
+                            '#flex': ana.get('morph'),
                             '#punctl': "",
                             '#punctr': punctr.strip(),
                             '#sent_pos': sent_pos
@@ -93,7 +97,32 @@ def xml2prs(xml_filename, prs_filename):
 
 
 def prs2xml(prs_filename, xml_filename):
-    pass
+    try:
+        root = etree.Element("body")
+        with open(prs_filename, encoding="utf-8") as f:
+            reader = csv.DictReader(f, delimiter="\t")
+            for row in reader:
+                if row['#wordno'] == '1' and row['#nvar'] == '1':
+                    se = etree.SubElement(root, "se")
+                if row['#nvar'] == '1':
+                    word = etree.SubElement(se, "word")
+                ana = etree.SubElement(word, "ana")
+                ana.set("lex", row['#lem'])
+                ana.set("morph", row['#flex'])
+                ana.set("gr", ",".join([row['#lex'], row['#gram']]))
+                if row['#nvar'] == row['#nvars']:
+                    ana.tail = row["#word"]
+                    word.tail = row['#punctr']
+        with open(xml_filename, "wb") as w:
+            # Pretty printing (or formatting) an XML document means adding white space to the content.
+            # These modifications are harmless if they only impact elements in the document that do not
+            # carry (text) data. They corrupt your data if they impact elements that contain data. If
+            # lxml cannot distinguish between whitespace and data, it will not alter your data.
+            # Поэтому при чтении красивого xml приходилось обрабатывать его strip'ами
+            w.write(etree.tostring(root, pretty_print=True, encoding="utf-8"))
+        print("Converting done.")
+    except Exception as e:
+        print(e)
 
 
 if __name__ == "__main__":
@@ -102,17 +131,14 @@ if __name__ == "__main__":
         infile = sys.argv[1]
         outfile = sys.argv[2]
         if os.path.isfile(infile):
-            if os.path.exists(os.dirname(outfile)):
-                # не обязательно заставлять пользователя указывать направление конвертации -
-                # его можно угадать по расширению источника
-                if os.path.splitext(os.dirname(infile)) == ".xml":
-                    xml2prs(infile, outfile)
-                elif os.path.splitext(os.dirname(infile)) == ".prs":
-                    prs2xml(infile, outfile)
-                else:
-                    print("Incorrect input file extension. Only XML and PRS are supported.")
+            # не обязательно заставлять пользователя указывать направление конвертации -
+            # его можно угадать по расширению источника
+            if os.path.splitext(infile)[1].lower() == ".xml":
+                xml2prs(infile, outfile)
+            elif os.path.splitext(infile)[1].lower() == ".prs":
+                prs2xml(infile, outfile)
             else:
-                print("Output path does not exist.")
+                print("Incorrect input file extension. Only XML and PRS are supported.")
         else:
             print("Input file does not exist.")
     else:
